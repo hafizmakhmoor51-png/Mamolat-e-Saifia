@@ -1,5 +1,7 @@
 {
   "name": "سلسلہ سیفیہ - معمولات و مراقبات",
-  "description": "سلسلہ سیفیہ کے معمولات، مراقبات اور اوقاتِ نماز کے لیے ایک جامع ایپ",
-  "requestFramePermissions": ["geolocation"]
+  "description": "سلسلہ عالیہ سیفیہ کے معمولات، 36 مراقبات، لطائف اور اوقاتِ نماز کی جامع ایپ",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
 }
