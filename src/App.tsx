@@ -5,39 +5,106 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Clock, Calendar, MapPin, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, ChevronDown, ChevronUp, Info, Calendar as CalendarIcon } from 'lucide-react';
 import { LATAIF, MURAQABAT } from './constants';
 import { PrayerTimings } from './types';
 
 export default function App() {
   const [time, setTime] = useState(new Date());
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimings | null>(null);
-  const [status, setStatus] = useState('انٹرنیٹ سے نمازوں کے اوقات لائے جا رہے ہیں...');
-  const [statusColor, setStatusColor] = useState('text-yellow-400');
+  const [status, setStatus] = useState('انٹرنیٹ سے سٹینڈرڈ ٹائم لایا جا رہا ہے...');
+  const [statusColor, setStatusColor] = useState('text-green-400');
+  const [location, setLocation] = useState('📍 لوکیشن تلاش کی جا رہی ہے...');
   const [expandedMuraqaba, setExpandedMuraqaba] = useState<number | null>(null);
+  const [timezone, setTimezone] = useState('Asia/Karachi');
+  const [globalOffset, setGlobalOffset] = useState(0);
 
+  // Time Sync Logic
   useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    async function fetchPrayerTimes() {
+    async function syncTime() {
       try {
-        // Defaulting to Gujar Khan as in original code
-        const res = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Gujar%20Khan&country=Pakistan&method=1&school=1');
+        // Primary: TimeAPI.io - Fetching UTC to avoid double-offset issues
+        const res = await fetch(`https://timeapi.io/api/Time/current/zone?timeZone=UTC`);
+        if (!res.ok) throw new Error();
         const data = await res.json();
-        if (data.data && data.data.timings) {
-          setPrayerTimes(data.data.timings);
-          setStatus('🟢 لائیو آٹو اپڈیٹ (گوجرخان - حنفی)');
-          setStatusColor('text-green-400');
-        }
+        // Ensure it's treated as UTC by appending 'Z'
+        const serverTime = new Date(data.dateTime + "Z").getTime();
+        setGlobalOffset(serverTime - Date.now());
+        setStatus(`🟢 لائیو سٹینڈرڈ ٹائم (${timezone})`);
       } catch (e) {
-        setStatus('🔴 آف لائن (انٹرنیٹ درکار ہے)');
-        setStatusColor('text-red-400');
+        try {
+          // Backup: WorldTimeAPI - Using UTC
+          const res = await fetch(`https://worldtimeapi.org/api/timezone/Etc/UTC`);
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          const serverTime = new Date(data.datetime).getTime();
+          setGlobalOffset(serverTime - Date.now());
+          setStatus('🟢 لائیو سٹینڈرڈ ٹائم (بیک اپ)');
+        } catch (e2) {
+          try {
+            // Backup 2: GitHub API (for Date header)
+            const res = await fetch('https://api.github.com/');
+            const serverDate = res.headers.get('Date');
+            if (!serverDate) throw new Error();
+            const serverTime = new Date(serverDate).getTime();
+            setGlobalOffset(serverTime - Date.now());
+            setStatus('🟢 لائیو انٹرنیشنل ٹائم');
+          } catch (e3) {
+            setStatus('🔴 ڈیوائس ٹائم (انٹرنیٹ کنیکٹ کریں)');
+            setStatusColor('text-red-400');
+          }
+        }
       }
     }
-    fetchPrayerTimes();
+    syncTime();
+  }, [timezone]);
+
+  // Clock Update
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(new Date(Date.now() + globalOffset));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [globalOffset]);
+
+  // Location and Prayer Times Logic
+  const initLocationAndPrayers = async () => {
+    let lat = 33.2612; // Default Gujar Khan
+    let lon = 73.3058;
+    let city = "گوجرخان";
+    let country = "پاکستان";
+
+    try {
+      const ipRes = await fetch('https://ipwho.is/');
+      if (ipRes.ok) {
+        const ipData = await ipRes.json();
+        lat = ipData.latitude || lat;
+        lon = ipData.longitude || lon;
+        city = ipData.city || city;
+        country = ipData.country || country;
+        if (ipData.timezone && ipData.timezone.id) {
+          setTimezone(ipData.timezone.id);
+        }
+      }
+    } catch (e) {
+      console.log("Location fetch failed, using defaults.");
+    }
+
+    setLocation(`📍 لوکیشن: ${city}، ${country}`);
+
+    try {
+      const prayerRes = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=1&school=1`);
+      const pData = await prayerRes.json();
+      if (pData.data && pData.data.timings) {
+        setPrayerTimes(pData.data.timings);
+      }
+    } catch (e) {
+      console.log("Prayer times fetch failed.");
+    }
+  };
+
+  useEffect(() => {
+    initLocationAndPrayers();
   }, []);
 
   const formatAMPM = (timeStr: string) => {
@@ -67,8 +134,8 @@ export default function App() {
 
   return (
     <div className="flex flex-col items-center min-h-screen pb-10 overflow-x-hidden" dir="rtl">
-      {/* Main Header */}
-      <header className="w-full bg-gradient-to-br from-black/80 to-[#D4AF37]/15 border-b-4 border-[#D4AF37] rounded-b-[30px] py-8 px-4 text-center shadow-2xl mb-4">
+      {/* Header */}
+      <header className="w-full bg-gradient-to-br from-black/80 to-[#D4AF37]/15 border-b-3 border-[#D4AF37] rounded-b-[30px] py-8 px-4 text-center shadow-2xl mb-4">
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -88,16 +155,34 @@ export default function App() {
 
       <main className="w-[95%] max-w-2xl flex flex-col gap-6">
         {/* Status Box */}
-        <section className="bg-black/50 p-4 rounded-2xl border border-[#D4AF37]/30 text-center shadow-lg">
-          <div className="flex items-center justify-center gap-2 text-lg mb-1">
-            <Calendar className="w-5 h-5 text-[#D4AF37]" />
-            <span>{time.toLocaleDateString('ur-PK', dateOptions)}</span>
+        <section className="bg-black/50 p-4 rounded-2xl border border-[#D4AF37] text-center shadow-lg relative overflow-hidden">
+          <div className="absolute top-2 right-2">
+            <button 
+              onClick={() => {
+                setStatus('انٹرنیٹ سے سٹینڈرڈ ٹائم لایا جا رہا ہے...');
+                initLocationAndPrayers();
+                // Re-trigger time sync by re-mounting or calling it
+                window.location.reload(); // Simplest way to re-trigger all syncs
+              }}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              title="ریفریش"
+            >
+              <motion.div whileTap={{ rotate: 360 }}>
+                <MapPin className="w-5 h-5 text-[#D4AF37]" />
+              </motion.div>
+            </button>
           </div>
-          <div className="text-3xl md:text-4xl font-bold text-[#ffdd57] font-mono tracking-widest mb-2" dir="ltr">
-            {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+          <div className="inline-block bg-[#D4AF37]/20 text-[#ffdd57] px-4 py-1 rounded-full text-lg mb-3 border border-[#D4AF37]/50">
+            {location}
+          </div>
+          <div className="flex items-center justify-center gap-2 text-lg mb-1 text-gray-200">
+            <CalendarIcon className="w-5 h-5 text-[#D4AF37]" />
+            <span>{time.toLocaleDateString('ur-PK', { timeZone: timezone, ...dateOptions })}</span>
+          </div>
+          <div className="text-4xl md:text-5xl font-bold text-white font-mono tracking-widest mb-2" dir="ltr">
+            {time.toLocaleTimeString('en-US', { timeZone: timezone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
           </div>
           <div className={`text-sm flex items-center justify-center gap-1 ${statusColor}`}>
-            <MapPin className="w-4 h-4" />
             {status}
           </div>
         </section>
@@ -107,7 +192,7 @@ export default function App() {
           <h2 className="text-3xl text-[#D4AF37] text-center border-b-2 border-dashed border-[#D4AF37] pb-2 mb-4 font-bold">
             اوقاتِ نماز (فقہ حنفی)
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {[
               { name: 'فجر', time: prayerTimes?.Fajr },
               { name: 'طلوع آفتاب', time: prayerTimes?.Sunrise },
@@ -135,7 +220,7 @@ export default function App() {
           <h2 className="text-3xl text-[#D4AF37] text-center border-b-2 border-dashed border-[#D4AF37] pb-2 mb-4 font-bold">
             اوقاتِ نوافل
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             <div className="bg-[#D4AF37]/10 border border-[#ffdd57] rounded-xl p-3 text-center shadow-md">
               <span className="block text-[#f1c40f] text-xl mb-1">تہجد</span>
               <span className="block text-white text-sm">عشاء سے فجر تک</span>
@@ -149,7 +234,7 @@ export default function App() {
             <div className="bg-[#D4AF37]/10 border border-[#ffdd57] rounded-xl p-3 text-center shadow-md">
               <span className="block text-[#f1c40f] text-xl mb-1">چاشت</span>
               <span className="block text-white text-sm" dir="ltr">
-                {prayerTimes ? `${formatAMPM(addMinutes(prayerTimes.Sunrise, 20))} کے بعد` : '--:--'}
+                {prayerTimes ? `${formatAMPM(addMinutes(prayerTimes.Sunrise, 45))} تا ${formatAMPM(addMinutes(prayerTimes.Dhuhr, -15))}` : '--:--'}
               </span>
             </div>
           </div>
@@ -184,7 +269,7 @@ export default function App() {
         <section className="bg-black/70 border border-[#D4AF37] rounded-2xl p-6 shadow-2xl">
           <h3 className="text-[#ffdd57] text-3xl text-center font-amiri mb-4">طریقہ و نیت ذکرِ نفی اثبات</h3>
           <p className="text-lg leading-relaxed text-justify mb-4">
-            ساتوں لطائف مکمل ہونے کے بعد سالک کو <strong>"لا إله إلا الله"</strong> کے ذکرِ نفی اثبات کی تلقین کی جاتی ہے۔ طاق عدد پر حبسِ نفس (سانس روک کر) ذکر کیا جاتا ہے:
+            ساتوں لطائف مکمل ہونے کے بعد سالک کو <strong>"لا إله إلا الله"</strong> کے ذکرِ نفی اثبات کی تلقین کی جاتی ہے۔ اس میں طاق عدد پر حبسِ نفس (سانس روک کر) ذکر کیا جاتا ہے:
           </p>
           
           <ul className="space-y-4 mb-6">
@@ -263,27 +348,11 @@ export default function App() {
                   <p className="text-[#ffdd57] font-bold mb-3">طریقہ معمولاتِ سیفیہ (بغیر پاس انفاس):</p>
                   <ul className="space-y-4">
                     <li>
-                      <span className="text-[#ffdd57] font-bold">پہلا سبق (کلمہ ھُو):</span>
-                      <p className="text-lg leading-relaxed mt-1">کلمہ "ھُو" کو آپ روح سے شروع کریں روح سے قلب اور قلب سے سرّ، سرّ سے اخفیٰ، اخفیٰ سے خفی اور پھر روح تک ایک گول دائرہ کی شکل میں گھماتے جائیں اور اس کو ایک تلوار فرض کریں...</p>
-                    </li>
-                    <li>
-                      <span className="text-[#ffdd57] font-bold">دوسرا سبق (اللّٰه ھُو):</span>
-                      <p className="text-lg leading-relaxed mt-1">کلمہ "اللّٰه" کا تصور قلب پر اور کلمہ "ھُو" کا تصور روح پر کریں اور زبان سے بھی ادا کرتے رہیں۔</p>
-                    </li>
-                    <li>
-                      <span className="text-[#ffdd57] font-bold">تیسرا سبق (ھُو اللّٰه):</span>
-                      <p className="text-lg leading-relaxed mt-1">کلمہ "ھُو" کا تصور روح پر اور کلمہ "اللّٰه" کا تصور قلب پر اور زبان سے بھی ادا کریں۔</p>
-                    </li>
-                    <li>
-                      <span className="text-[#ffdd57] font-bold">چوتھا سبق:</span>
-                      <div className="text-center my-3">
-                        <span className="font-amiri text-[#ffdd57] text-2xl">انت الهادى انت الحق ليس الهادى الا هو</span>
-                      </div>
-                      <p className="text-lg leading-relaxed">طریقہ: "اَنْتَ الْھَادِی اَنْتَ" کا تصور قلب پر اور "الْحَقُّ" کا تصور اخفیٰ پر... "لَیْسَ الْھَادِیْ" کو اخفیٰ سے واپس شروع کر کے "اِلَّا" کو قلب پر اور "ھُو" کو روح پر اور ساتھ ساتھ زبان سے بھی پڑھنا ہے۔</p>
+                      <span className="text-[#ffdd57] font-bold">ذکرِ جہر مع ضرب:</span>
+                      <p className="text-lg leading-relaxed mt-1">قلب سے <strong>"لا إله"</strong> کھینچ کر دائیں کندھے پر لاتے ہیں، پھر سر پر لے جاتے ہیں، اور وہاں سے <strong>"إلا الله"</strong> کی ضرب پوری قوت سے دوبارہ دل (قلب) پر لگاتے ہیں۔</p>
                     </li>
                     <li className="bg-[#D4AF37]/10 p-3 rounded-lg border border-[#D4AF37]/30">
                       <span className="text-[#ffdd57] font-bold">مراقبہ چشتیہ:</span>
-                      <p className="text-lg leading-relaxed mt-1">5 منٹ یا 4 رکعت نماز کی مقدار سانس بند کر کے قلب میں اللہ اللہ کہنا ہے۔</p>
                       <p className="mt-2"><span className="text-[#D4AF37] font-bold">نیت:</span> <em>"فیض می آید از ذاتِ بے چوں بلطیفہ قلب من، بواسطہ پیرانِ کبار، خصوصاً حضرت خواجہ معین الدین حسن چشتی اجمیریؒ"</em></p>
                     </li>
                   </ul>
@@ -302,20 +371,16 @@ export default function App() {
                   <p className="text-[#ffdd57] font-bold mb-3">کتاب معمولاتِ سیفیہ کے مطابق:</p>
                   <ul className="space-y-4">
                     <li>
-                      <span className="text-[#ffdd57] font-bold">پہلا سبق (نفی اثبات):</span>
-                      <p className="text-lg leading-relaxed mt-1">سب سے پہلے سانس بند کریں... ترتیب یہ ہے کہ کلمہ "لا" کو قلب سے لے کر دائیں کندھے تک لے جائیں اور "اِلٰہ" کو قالبی پر اور "اِلَّا اللّٰہ" کی ضرب پوری شدت سے قلب پر لگائیں... "لَا مَعْبُوْدَ اِلَّا اللّٰہ، لَا مَقْصُوْدَ اِلَّا اللّٰہ، لَا مَطْلُوْبَ اِلَّا اللّٰہ، لَا مَوْجُوْدَ اِلَّا اللّٰہ" کے تصور کے ساتھ 100 دفعہ پڑھنے کے بعد ایک دفعہ "مُحَمَّدُ رَّسُوْلُ اللّٰہ ﷺ" کہیں۔ تعداد 1000 ہزار ہے۔</p>
+                      <span className="text-[#ffdd57] font-bold">پہلا سبق (ذکر الا اللہ):</span>
+                      <p className="text-lg leading-relaxed mt-1">پہلے ایک بار <strong>"لا إله إلا الله"</strong> کہیں، پھر 100 مرتبہ <strong>"إلا الله"</strong> کہیں، اور پھر <strong>"محمد رسول الله ﷺ"</strong> پڑھیں۔ اس ترتیب سے 1000 مرتبہ مکمل کریں۔</p>
                     </li>
                     <li>
-                      <span className="text-[#ffdd57] font-bold">دوسرا سبق (اِلَّا اللّٰہ):</span>
-                      <p className="text-lg leading-relaxed mt-1">پہلے کی طرح ہے "لَا اِلٰہ اِلَّا اللّٰہ" ایک بار پڑھ کر شروع کریں، پھر "اِلَّا اللّٰہ" کی ضرب قلب پر لگاتے جائیں۔ 100 کے بعد محمد رسول اللہ ﷺ... تعداد 1000۔</p>
+                      <span className="text-[#ffdd57] font-bold">دوسرا سبق (ذکر جل جلالہ):</span>
+                      <p className="text-lg leading-relaxed mt-1">پہلے ایک مرتبہ <strong>"الله جل جلاله"</strong> کہیں، پھر <strong>"جل جلاله"</strong> کی تکرار کریں۔ اسے بھی 1000 مرتبہ مکمل کریں۔</p>
                     </li>
                     <li>
-                      <span className="text-[#ffdd57] font-bold">تیسرا سبق (اسم ذات اللّٰہ):</span>
-                      <p className="text-lg leading-relaxed mt-1">قلب پر، پہلی دفعہ "اللّٰہ جَلَّ جَلَالُہٗ" پھر "اللّٰہ" 100 بار پڑھ کر رکنے کے بعد "جَلَّ جَلَالُہٗ" زبان سے بھی کہنا ہے... تعداد 1000۔</p>
-                    </li>
-                    <li>
-                      <span className="text-[#ffdd57] font-bold">چوتھا سبق (ھُو):</span>
-                      <p className="text-lg leading-relaxed mt-1">"ھُو" روح سے، قلب سے سرّ، سرّ سے اخفیٰ، اخفیٰ سے خفی سے دوبارہ روح پر لانا ہے۔ زبان سے بھی کہنا ہے... تعداد 1000۔</p>
+                      <span className="text-[#ffdd57] font-bold">تیسرا سبق (ذکر ھُو):</span>
+                      <p className="text-lg leading-relaxed mt-1"><strong>"ھُو"</strong> کا ذکر، جو لطیفہ روح سے شروع ہو کر سر، خفی سے ہوتا ہوا لطیفہ اخفیٰ تک آتا ہے۔ 1000 مرتبہ۔</p>
                     </li>
                     <li className="bg-[#D4AF37]/10 p-3 rounded-lg border border-[#D4AF37]/30">
                       <span className="text-[#ffdd57] font-bold">مراقبہ قادریہ:</span>
@@ -357,12 +422,12 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="mt-10 text-gray-400 text-center text-sm px-4">
+      <footer className="mt-10 text-gray-400 text-center text-sm px-4 pb-8">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Info className="w-4 h-4" />
+          <Info className="w-4 h-4 text-[#D4AF37]" />
           <span>یہ ایپ سلسلہ عالیہ سیفیہ کے معمولات کو عام کرنے کے لیے بنائی گئی ہے۔</span>
         </div>
-        <p>© {new Date().getFullYear()} سلسلہ سیفیہ - تمام حقوق محفوظ ہیں</p>
+        <p dir="ltr">© {new Date().getFullYear()} Silsila Saifia - All Rights Reserved</p>
       </footer>
     </div>
   );
