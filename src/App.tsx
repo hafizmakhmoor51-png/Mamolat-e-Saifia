@@ -149,7 +149,7 @@ export default function App() {
             <div className="bg-[#D4AF37]/10 border border-[#ffdd57] rounded-xl p-3 text-center shadow-md">
               <span className="block text-[#f1c40f] text-xl mb-1">چاشت</span>
               <span className="block text-white text-sm" dir="ltr">
-                {prayerTimes ? `${formatAMPM(addMinutes(prayerTimes.Sunrise, 45))} تا ${formatAMPM(addMinutes(prayerTimes.Dhuhr, -15))}` : '--:--'}
+                {prayerTimes ? `${formatAMPM(addMinutes(prayerTimes.Sunrise, 20))} کے بعد` : '--:--'}
               </span>
             </div>
           </div>
@@ -157,8 +157,8 @@ export default function App() {
 
         {/* Lataif */}
         <section>
-          <h2 className="text-3xl text-[#D4AF37] text-center border-b-2 border-dashed border-[#D4AF37] pb-2 mb-4 font-bold">
-            مقاماتِ لطائفِ ستّہ
+          <h2 className="text-3xl text-[#D4AF37] text-center border-b-2 border-dashed border-[#D4AF37] pb-2 mb-4 font-bold mt-8">
+            اسباق طریقہ عالیہ نقشبندیہ
           </h2>
           <div className="flex flex-col gap-3">
             {LATAIF.map((l) => (
@@ -184,17 +184,17 @@ export default function App() {
         <section className="bg-black/70 border border-[#D4AF37] rounded-2xl p-6 shadow-2xl">
           <h3 className="text-[#ffdd57] text-3xl text-center font-amiri mb-4">طریقہ و نیت ذکرِ نفی اثبات</h3>
           <p className="text-lg leading-relaxed text-justify mb-4">
-            ساتوں لطائف (اسباق) مکمل ہونے کے بعد سالک کو <strong>"لا إله إلا الله"</strong> کے ذکرِ نفی اثبات کی تلقین کی جاتی ہے۔ اس میں طاق عدد پر حبسِ نفس (سانس روک کر) ذکر کیا جاتا ہے:
+            ساتوں لطائف مکمل ہونے کے بعد سالک کو <strong>"لا إله إلا الله"</strong> کے ذکرِ نفی اثبات کی تلقین کی جاتی ہے۔ طاق عدد پر حبسِ نفس (سانس روک کر) ذکر کیا جاتا ہے:
           </p>
           
-          <ul className="space-y-3 mb-6">
+          <ul className="space-y-4 mb-6">
             {[
               { label: 'حبسِ نفس', text: 'زبان کو تالو سے لگا کر سانس کو ناف کے نیچے روک لیں۔' },
               { label: 'لا (نفی)', text: "خیال کریں کہ 'لا' کو ناف سے کھینچ کر دماغ تک لے گئے۔" },
               { label: 'إله', text: 'دماغ سے کھینچ کر دائیں کندھے تک لائے۔' },
               { label: 'إلا الله (اثبات)', text: 'دائیں کندھے سے پوری قوت کے ساتھ لطیفہ قلب (دل) پر ضرب لگائیں۔' },
             ].map((step, i) => (
-              <li key={i} className="flex gap-2 text-lg">
+              <li key={i} className="flex gap-2 text-lg leading-relaxed">
                 <span className="text-[#ffdd57] text-2xl leading-none">•</span>
                 <span><span className="text-[#ffdd57] font-bold">{step.label}:</span> {step.text}</span>
               </li>
@@ -212,7 +212,7 @@ export default function App() {
         {/* Muraqabat */}
         <section>
           <h2 className="text-3xl text-[#D4AF37] text-center border-b-2 border-dashed border-[#D4AF37] pb-2 mb-2 font-bold">
-            معمولاتِ سیفیہ: 36 مراقبات مع نیت
+            معمولاتِ سیفیہ: 36 مراقبات
           </h2>
           <p className="text-center text-gray-300 text-lg mb-4">کسی بھی مراقبے پر کلک کریں تاکہ اس کی پوری نیت ظاہر ہو۔</p>
           
@@ -243,6 +243,116 @@ export default function App() {
                 </AnimatePresence>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Other Silsilas */}
+        <section>
+          <h2 className="text-3xl text-[#D4AF37] text-center border-b-2 border-dashed border-[#D4AF37] pb-2 mb-4 font-bold mt-8">
+            دیگر سلاسل کے اسباق
+          </h2>
+          <div className="flex flex-col gap-4">
+            {/* Chishtia */}
+            <div className="bg-black/60 border border-[#D4AF37] rounded-xl overflow-hidden shadow-lg">
+              <details className="group">
+                <summary className="flex items-center justify-between p-4 bg-[#D4AF37]/15 cursor-pointer list-none">
+                  <span className="text-xl font-bold text-[#ffdd57]">اسباق طریقہ عالیہ چشتیہ</span>
+                  <ChevronDown className="text-[#D4AF37] group-open:rotate-180 transition-transform" />
+                </summary>
+                <div className="p-5 bg-black/50 border-t border-dashed border-[#D4AF37]/40">
+                  <p className="text-[#ffdd57] font-bold mb-3">طریقہ معمولاتِ سیفیہ (بغیر پاس انفاس):</p>
+                  <ul className="space-y-4">
+                    <li>
+                      <span className="text-[#ffdd57] font-bold">پہلا سبق (کلمہ ھُو):</span>
+                      <p className="text-lg leading-relaxed mt-1">کلمہ "ھُو" کو آپ روح سے شروع کریں روح سے قلب اور قلب سے سرّ، سرّ سے اخفیٰ، اخفیٰ سے خفی اور پھر روح تک ایک گول دائرہ کی شکل میں گھماتے جائیں اور اس کو ایک تلوار فرض کریں...</p>
+                    </li>
+                    <li>
+                      <span className="text-[#ffdd57] font-bold">دوسرا سبق (اللّٰه ھُو):</span>
+                      <p className="text-lg leading-relaxed mt-1">کلمہ "اللّٰه" کا تصور قلب پر اور کلمہ "ھُو" کا تصور روح پر کریں اور زبان سے بھی ادا کرتے رہیں۔</p>
+                    </li>
+                    <li>
+                      <span className="text-[#ffdd57] font-bold">تیسرا سبق (ھُو اللّٰه):</span>
+                      <p className="text-lg leading-relaxed mt-1">کلمہ "ھُو" کا تصور روح پر اور کلمہ "اللّٰه" کا تصور قلب پر اور زبان سے بھی ادا کریں۔</p>
+                    </li>
+                    <li>
+                      <span className="text-[#ffdd57] font-bold">چوتھا سبق:</span>
+                      <div className="text-center my-3">
+                        <span className="font-amiri text-[#ffdd57] text-2xl">انت الهادى انت الحق ليس الهادى الا هو</span>
+                      </div>
+                      <p className="text-lg leading-relaxed">طریقہ: "اَنْتَ الْھَادِی اَنْتَ" کا تصور قلب پر اور "الْحَقُّ" کا تصور اخفیٰ پر... "لَیْسَ الْھَادِیْ" کو اخفیٰ سے واپس شروع کر کے "اِلَّا" کو قلب پر اور "ھُو" کو روح پر اور ساتھ ساتھ زبان سے بھی پڑھنا ہے۔</p>
+                    </li>
+                    <li className="bg-[#D4AF37]/10 p-3 rounded-lg border border-[#D4AF37]/30">
+                      <span className="text-[#ffdd57] font-bold">مراقبہ چشتیہ:</span>
+                      <p className="text-lg leading-relaxed mt-1">5 منٹ یا 4 رکعت نماز کی مقدار سانس بند کر کے قلب میں اللہ اللہ کہنا ہے۔</p>
+                      <p className="mt-2"><span className="text-[#D4AF37] font-bold">نیت:</span> <em>"فیض می آید از ذاتِ بے چوں بلطیفہ قلب من، بواسطہ پیرانِ کبار، خصوصاً حضرت خواجہ معین الدین حسن چشتی اجمیریؒ"</em></p>
+                    </li>
+                  </ul>
+                </div>
+              </details>
+            </div>
+
+            {/* Qadria */}
+            <div className="bg-black/60 border border-[#D4AF37] rounded-xl overflow-hidden shadow-lg">
+              <details className="group">
+                <summary className="flex items-center justify-between p-4 bg-[#D4AF37]/15 cursor-pointer list-none">
+                  <span className="text-xl font-bold text-[#ffdd57]">اسباق طریقہ عالیہ قادریہ</span>
+                  <ChevronDown className="text-[#D4AF37] group-open:rotate-180 transition-transform" />
+                </summary>
+                <div className="p-5 bg-black/50 border-t border-dashed border-[#D4AF37]/40">
+                  <p className="text-[#ffdd57] font-bold mb-3">کتاب معمولاتِ سیفیہ کے مطابق:</p>
+                  <ul className="space-y-4">
+                    <li>
+                      <span className="text-[#ffdd57] font-bold">پہلا سبق (نفی اثبات):</span>
+                      <p className="text-lg leading-relaxed mt-1">سب سے پہلے سانس بند کریں... ترتیب یہ ہے کہ کلمہ "لا" کو قلب سے لے کر دائیں کندھے تک لے جائیں اور "اِلٰہ" کو قالبی پر اور "اِلَّا اللّٰہ" کی ضرب پوری شدت سے قلب پر لگائیں... "لَا مَعْبُوْدَ اِلَّا اللّٰہ، لَا مَقْصُوْدَ اِلَّا اللّٰہ، لَا مَطْلُوْبَ اِلَّا اللّٰہ، لَا مَوْجُوْدَ اِلَّا اللّٰہ" کے تصور کے ساتھ 100 دفعہ پڑھنے کے بعد ایک دفعہ "مُحَمَّدُ رَّسُوْلُ اللّٰہ ﷺ" کہیں۔ تعداد 1000 ہزار ہے۔</p>
+                    </li>
+                    <li>
+                      <span className="text-[#ffdd57] font-bold">دوسرا سبق (اِلَّا اللّٰہ):</span>
+                      <p className="text-lg leading-relaxed mt-1">پہلے کی طرح ہے "لَا اِلٰہ اِلَّا اللّٰہ" ایک بار پڑھ کر شروع کریں، پھر "اِلَّا اللّٰہ" کی ضرب قلب پر لگاتے جائیں۔ 100 کے بعد محمد رسول اللہ ﷺ... تعداد 1000۔</p>
+                    </li>
+                    <li>
+                      <span className="text-[#ffdd57] font-bold">تیسرا سبق (اسم ذات اللّٰہ):</span>
+                      <p className="text-lg leading-relaxed mt-1">قلب پر، پہلی دفعہ "اللّٰہ جَلَّ جَلَالُہٗ" پھر "اللّٰہ" 100 بار پڑھ کر رکنے کے بعد "جَلَّ جَلَالُہٗ" زبان سے بھی کہنا ہے... تعداد 1000۔</p>
+                    </li>
+                    <li>
+                      <span className="text-[#ffdd57] font-bold">چوتھا سبق (ھُو):</span>
+                      <p className="text-lg leading-relaxed mt-1">"ھُو" روح سے، قلب سے سرّ، سرّ سے اخفیٰ، اخفیٰ سے خفی سے دوبارہ روح پر لانا ہے۔ زبان سے بھی کہنا ہے... تعداد 1000۔</p>
+                    </li>
+                    <li className="bg-[#D4AF37]/10 p-3 rounded-lg border border-[#D4AF37]/30">
+                      <span className="text-[#ffdd57] font-bold">مراقبہ قادریہ:</span>
+                      <p className="text-lg leading-relaxed mt-1">5 منٹ سانس بند کر کے۔</p>
+                      <p className="mt-2"><span className="text-[#D4AF37] font-bold">نیت:</span> <em>"فیض می آید از ذاتِ بے چوں بلطیفہ قلب من، بواسطہ پیرانِ کبار، خصوصاً محبوب سبحانی سید شیخ عبدالقادر جیلانیؒ"</em></p>
+                    </li>
+                  </ul>
+                </div>
+              </details>
+            </div>
+
+            {/* Suhrawardia */}
+            <div className="bg-black/60 border border-[#D4AF37] rounded-xl overflow-hidden shadow-lg">
+              <details className="group">
+                <summary className="flex items-center justify-between p-4 bg-[#D4AF37]/15 cursor-pointer list-none">
+                  <span className="text-xl font-bold text-[#ffdd57]">اسباق طریقہ عالیہ سہروردیہ</span>
+                  <ChevronDown className="text-[#D4AF37] group-open:rotate-180 transition-transform" />
+                </summary>
+                <div className="p-5 bg-black/50 border-t border-dashed border-[#D4AF37]/40">
+                  <p className="text-[#ffdd57] font-bold mb-3">معمولات سیفیہ کی ہدایات:</p>
+                  <ul className="space-y-4">
+                    <li>
+                      <span className="text-[#ffdd57] font-bold">طریقہ کار:</span>
+                      <p className="text-lg leading-relaxed mt-1">اس سلسلہ عالیہ کے اسباق بعینہٖ طریقہ قادریہ کی طرح ہیں، ترتیب بھی وہی ہے۔</p>
+                    </li>
+                    <li>
+                      <span className="text-[#ffdd57] font-bold">فرق:</span>
+                      <p className="text-lg leading-relaxed mt-1">قادریہ شریف کا مراقبہ پانچ منٹ کا ہے جبکہ سہروردیہ کا مراقبہ کم از کم بیس منٹ ہے اور اکثر زیادہ کی کوئی حد نہیں۔ نیز اس مراقبہ میں آنکھیں بند کر کے بیٹھیں (سانس بند کرنا یعنی حبسِ نفس شرط نہیں ہے)۔</p>
+                    </li>
+                    <li className="bg-[#D4AF37]/10 p-3 rounded-lg border border-[#D4AF37]/30">
+                      <span className="text-[#ffdd57] font-bold">مراقبہ سہروردیہ:</span>
+                      <p className="mt-2"><span className="text-[#D4AF37] font-bold">نیت:</span> <em>"فیض می آید از ذاتِ بے چوں بلطیفہ قلب من، بواسطہ پیرانِ کبار، خصوصاً حضرت شیخ شہاب الدین سہروردیؒ"</em></p>
+                    </li>
+                  </ul>
+                </div>
+              </details>
+            </div>
           </div>
         </section>
       </main>
