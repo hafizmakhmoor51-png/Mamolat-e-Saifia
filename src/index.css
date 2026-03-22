@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Gulzar&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-amiri: "Amiri Quran", serif;
+  --font-gulzar: "Gulzar", serif;
+}
+
+body {
+  @apply bg-slate-950 text-white min-h-screen font-gulzar;
+  background: linear-gradient(rgba(0, 30, 15, 0.92), rgba(0, 30, 15, 0.98)), url('https://images.unsplash.com/photo-1564769625905-50e93615e769?q=80&w=2000&auto=format&fit=crop') no-repeat center center fixed;
+  background-size: cover;
+}
+
+/* Custom scrollbar for better RTL experience if needed */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 4px;
+}
