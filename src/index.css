@@ -1,5 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Gulzar&display=swap');
 @import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Gulzar&display=swap');
 
 @theme {
   --font-amiri: "Amiri Quran", serif;
@@ -7,19 +8,33 @@
 }
 
 body {
-  @apply bg-slate-950 text-white min-h-screen font-gulzar;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-gulzar), ui-sans-serif, system-ui, sans-serif;
   background: linear-gradient(rgba(0, 30, 15, 0.92), rgba(0, 30, 15, 0.98)), url('https://images.unsplash.com/photo-1564769625905-50e93615e769?q=80&w=2000&auto=format&fit=crop') no-repeat center center fixed;
   background-size: cover;
+  color: white;
+  min-height: 100vh;
 }
 
-/* Custom scrollbar for better RTL experience if needed */
-::-webkit-scrollbar {
-  width: 8px;
+/* Custom scrollbar for Quran boxes */
+.quran-box::-webkit-scrollbar {
+  width: 6px;
 }
-::-webkit-scrollbar-track {
+
+.quran-box::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
 }
-::-webkit-scrollbar-thumb {
+
+.quran-box::-webkit-scrollbar-thumb {
   background: #D4AF37;
-  border-radius: 4px;
+  border-radius: 10px;
+}
+
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
 }

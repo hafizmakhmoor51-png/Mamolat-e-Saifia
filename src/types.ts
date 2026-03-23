@@ -1,10 +1,11 @@
-export interface PrayerTimings {
-  Fajr: string;
-  Sunrise: string;
-  Dhuhr: string;
-  Asr: string;
-  Maghrib: string;
-  Isha: string;
+export interface ShajraMember {
+  name: string;
+  bio: string;
+}
+
+export interface Shajra {
+  title: string;
+  members: ShajraMember[];
 }
 
 export interface Muraqaba {
@@ -12,13 +13,17 @@ export interface Muraqaba {
   text: string;
 }
 
-export interface Latifa {
-  id: string;
+export interface Khatm {
   name: string;
-  color: string;
-  location: string;
-  prophet: string;
-  icon: string;
-  borderColor: string;
-  glowColor: string;
+  zikr: string;
+}
+
+export interface PrayerTimes {
+  Fajr: string;
+  Sunrise: string;
+  Dhuhr: string;
+  Asr: string;
+  Maghrib: string;
+  Isha: string;
+  [key: string]: string;
 }
